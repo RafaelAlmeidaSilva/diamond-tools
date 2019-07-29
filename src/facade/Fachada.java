@@ -45,6 +45,75 @@ public class Fachada implements IFachada{
 	Map<String, List<IStrategy>> mapRelatorioStrategy;
 	Map<String, Map<String, List<IStrategy>>> mapEntidadeCRUDStrategy;
 	
+	public Fachada(EntidadeDominio entidade) {
+
+		swicth(entidade.class..getSimpleName())
+		{
+			// Faltam algumas implementações mas foi baseado
+			// no que ja estava codificado.
+			// A ideia é diminuir o numero de instancias no construtor da fachada.
+			// quando menos instâncias menos memoria consumida.
+
+			case "PedidoItem":
+					mapPedidoItemStrategy = new HashMap<String, List<IStrategy>>();
+					mapEntidadeCRUDStrategy.put(PedidoItem.class.getSimpleName(), mapPedidoItemStrategy);
+					mapDAO.put(PedidoItem.class.getSimpleName(), new PedidoItemDAO());
+			 break;
+			case "Carrinho":
+					mapCarrinhoStrategy = new HashMap<String, List<IStrategy>>();
+					List<IStrategy> listStrategyAlterarCarrinho = new ArrayList<>();
+					listStrategyAlterarCarrinho.add(new StMontaCarrinho());
+					mapCarrinhoStrategy.put("SALVAR", listStrategyAlterarCarrinho);
+					mapEntidadeCRUDStrategy.put(Carrinho.class.getSimpleName(), mapCarrinhoStrategy);
+					mapDAO.put(Carrinho.class.getSimpleName(), new CarrinhoDAO());
+					mapDAO.put(ItemCarrinho.class.getSimpleName(), new ItemCarrinhoDAO());
+			 break; 
+			case "Produto":
+					mapProdutoStrategy = new HashMap<String, List<IStrategy>>();  
+					List<IStrategy> listStrategySalvarProduto = new ArrayList<>();
+					listStrategySalvarProduto.add(new StValidaDadosProduto());
+					mapProdutoStrategy.put("SALVAR", listStrategySalvarProduto);
+					mapEntidadeCRUDStrategy.put(Produto.class.getSimpleName(), mapProdutoStrategy);
+					mapDAO.put(Produto.class.getSimpleName(), new ProdutoDAO());
+			 break;
+			case "Cliente":
+					mapClienteStrategy = new HashMap<String, List<IStrategy>>();
+					List<IStrategy> listStrategySalvarCliente = new ArrayList<>();
+					listStrategySalvarCliente.add(new StValidaDadosCliente());
+					listStrategySalvarCliente.add(new StValidaCpf());
+					listStrategySalvarCliente.add(new StValidaSenha());
+					mapClienteStrategy.put("SALVAR", listStrategySalvarCliente);
+					mapEntidadeCRUDStrategy.put(Cliente.class.getSimpleName(), mapClienteStrategy);
+					mapDAO.put(Cliente.class.getSimpleName(), new ClienteDAO());
+			 break;
+			case "Usuario":
+					mapUsuarioStrategy = new HashMap<String, List<IStrategy>>();
+					List<IStrategy> listStrategyConsultarUsuario = new ArrayList<>();
+					listStrategyConsultarUsuario.add(new StValidaDadosUsuario());
+					List<IStrategy> listStrategyConsultarValidarUsuario = new ArrayList<>();
+					listStrategyConsultarValidarUsuario.add(new StValidaLoginExistente());
+					mapUsuarioStrategy.put("CONSULTAR", listStrategyConsultarUsuario);
+					mapUsuarioStrategy.put("CONSULTAR#EXISTENCIA", listStrategyConsultarValidarUsuario);
+					mapEntidadeCRUDStrategy.put(Usuario.class.getSimpleName(), mapUsuarioStrategy);
+					mapDAO.put(Usuario.class.getSimpleName(), new UsuarioDAO());
+			 break;
+			case "Pedido":
+					mapPedidoStrategy = new HashMap<String, List<IStrategy>>();
+					mapEntidadeCRUDStrategy.put(Pedido.class.getSimpleName(), mapPedidoStrategy);
+					mapDAO.put(Pedido.class.getSimpleName(), new PedidoDAO());
+					
+			 break;
+			case "Relatorio":
+					mapRelatorioStrategy = new HashMap<String, List<IStrategy>>();
+					mapDAO.put(Relatorio.class.getSimpleName(), new RelatorioDAO());
+			 break;
+			
+
+		}
+
+
+	}
+
 	public Fachada() {
 		// inicializa mapas
 		mapDAO = new HashMap<String, IDAO>();
